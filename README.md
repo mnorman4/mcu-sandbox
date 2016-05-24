@@ -1,2 +1,3 @@
-# mcu-sandbox
-fun with microcontrollers
+# MCU Sandbox
+Fun projects for learning to use microcontrollers, embedded systems, and other fun stuff. 
+
