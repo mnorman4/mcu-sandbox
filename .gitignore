@@ -1,1 +1,4 @@
-/debug
+Debug
+Release
+.settings
+*.bak
