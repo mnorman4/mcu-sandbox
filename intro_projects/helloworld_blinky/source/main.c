@@ -28,37 +28,69 @@
  */
 
 #include "board.h"
-#include "fsl_gpio.h"
+
+/*!
+ * @brief my LED configuration structure
+ */
+typedef struct _led_config
+{
+    gpio_pin_config_t config; /*!< GPIO config structure */
+    GPIO_Type *       base;   /*!< GPIO peripheral base pointer */
+    uint32_t          pin;    /*!< GPIO pin number */
+} led_config_t;
+
+/*!
+ * @brief a simple delay loop
+ */ 
+static void delay (uint32_t nops)
+{
+    int i = nops; 
+
+    while (--i)
+        __asm("NOP");
+}
 
 /*!
  * @brief Application entry point.
  */
 int main(void)
 {
-    gpio_pin_config_t BlueLED;
-
-    /* Init board hardware. */
+	/* Define my LEDs */
+    led_config_t RedLED = { {kGPIO_DigitalOutput, 1U}, GPIOB, 22U};
+    led_config_t BlueLED = { {kGPIO_DigitalOutput, 1U}, GPIOB, 21U};
+    led_config_t GreenLED = { {kGPIO_DigitalOutput, 1U}, GPIOE, 26U};
+    
+    /* Ramp up the clock to full-speed run (120MHz) */
     BOARD_BootClockRUN();
+
+    /* Initialize the console and LED pins */
     BOARD_InitPins();
+
+    /* Initizliaze the debug console */
     BOARD_InitDebugConsole();
 
     /* Send a proof-of-life message out to the console */
     PRINTF("Blinky, Blinky!\r\n");
 
-    /* Initialize the GPIO connected to the BLUE LED */
-    BlueLED.pinDirection = kGPIO_DigitalOutput;
-    BlueLED.outputLogic  = 1;
-    GPIO_PinInit(GPIOB, 21, &BlueLED);
-
-    /* Toggle forever */
+    /* Initialize the GPIOs connected to the LEDs */
+    GPIO_PinInit(RedLED.base, RedLED.pin, &(RedLED.config));
+    GPIO_PinInit(BlueLED.base, BlueLED.pin, &(BlueLED.config));
+    GPIO_PinInit(GreenLED.base, GreenLED.pin, &(GreenLED.config));
+    
+    /* Blinky, Blinky */
     for (;;)
     {
-        int i = 10000000;
-        while (--i)
-        {
-            __asm("NOP");
-        }
-
-        GPIO_TogglePinsOutput(GPIOB, (1 << 21));
+        GPIO_TogglePinsOutput(BlueLED.base, (1 << BlueLED.pin));
+        delay(5000000);
+        GPIO_TogglePinsOutput(RedLED.base, (1 << RedLED.pin));
+        delay(5000000);
+        GPIO_TogglePinsOutput(GreenLED.base, (1 << GreenLED.pin));
+        delay(5000000);
+        GPIO_TogglePinsOutput(BlueLED.base, (1 << BlueLED.pin));
+        delay(5000000);
+        GPIO_TogglePinsOutput(RedLED.base, (1 << RedLED.pin));
+        delay(5000000);
+        GPIO_TogglePinsOutput(GreenLED.base, (1 << GreenLED.pin));
+        delay(5000000);
     }
 }
